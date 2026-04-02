@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz autori e opere</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#667085;
+      --border:#d0d7e2;
+      --blue:#9ddfff;
+      --blue-border:#3aaee8;
+      --green:#dff5e1;
+      --green-border:#2e7d32;
+      --red:#ffe3e3;
+      --red-border:#d64545;
+      --shadow:0 8px 24px rgba(0,0,0,.08);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+
+    html{-webkit-text-size-adjust:100%;}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.35;
+    }
+
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:20px 18px 34px;
+    }
+
+    .topbar{
+      background:#fff;
+      border:2px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+      text-align:center;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(1.55rem, 2vw, 2rem);
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:clamp(.98rem, 1.5vw, 1.06rem);
+      margin-bottom:14px;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .page-indicator{
+      background:#fff;
+      border:2px solid var(--border);
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:700;
+      min-width:140px;
+    }
+
+    .page{display:none}
+    .page.active{display:block}
+
+    .intro{
+      background:#fff;
+      border:2px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      text-align:center;
+      font-size:clamp(1rem, 1.5vw, 1.12rem);
+      font-weight:700;
+      margin-bottom:16px;
+    }
+
+    .question{
+      background:var(--card);
+      border:2px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px;
+    }
+
+    .row-layout{
+      display:grid;
+      grid-template-columns:minmax(280px, 360px) minmax(0, 1fr);
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .author-card{
+      background:#fff;
+      border:2px solid var(--border);
+      border-radius:18px;
+      padding:12px;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      min-height:100%;
+    }
+
+    .author-card img{
+      width:100%;
+      height:clamp(210px, 24vw, 280px);
+      object-fit:cover;
+      border-radius:16px;
+      border:2px solid #e5e7eb;
+      margin-bottom:10px;
+      background:#fff;
+    }
+
+    .author-name{
+      font-size:clamp(1.08rem, 1.6vw, 1.22rem);
+      font-weight:700;
+      line-height:1.25;
+      padding:2px 4px 0;
+    }
+
+    .choices-column{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      justify-content:center;
+    }
+
+    .choice, .author-choice{
+      -webkit-tap-highlight-color: transparent;
+      transition:transform .06s ease, background-color .15s ease, border-color .15s ease;
+    }
+    .choice:active, .author-choice:active{transform:scale(.99)}
+
+    .choice{
+      width:100%;
+      border:2px solid var(--border);
+      background:#fff;
+      border-radius:18px;
+      padding:16px 18px;
+      min-height:72px;
+      text-align:left;
+      cursor:pointer;
+      font-size:clamp(1rem, 1.5vw, 1.08rem);
+      font-weight:700;
+      color:var(--text);
+    }
+
+    .choice.selected, .author-choice.selected{
+      background:var(--blue);
+      border-color:var(--blue-border);
+    }
+
+    .choice.correct, .author-choice.correct{
+      background:var(--green);
+      border-color:var(--green-border);
+    }
+
+    .choice.wrong, .author-choice.wrong{
+      background:var(--red);
+      border-color:var(--red-border);
+    }
+
+    .work-title{
+      font-size:clamp(1.08rem, 1.7vw, 1.22rem);
+      font-weight:700;
+      line-height:1.3;
+      margin-bottom:14px;
+      text-align:left;
+    }
+
+    .cards-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:14px;
+    }
+
+    .author-choice{
+      border:2px solid var(--border);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      text-align:center;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--text);
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+
+    .author-choice img{
+      width:100%;
+      height:clamp(180px, 18vw, 230px);
+      object-fit:cover;
+      border-radius:16px;
+      border:2px solid #e5e7eb;
+      margin-bottom:10px;
+      background:#fff;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    button.mainbtn{
+      border:none;
+      border-radius:18px;
+      padding:14px 20px;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      min-width:132px;
+      box-shadow:var(--shadow);
+    }
+
+    .primary{background:#3aaee8; color:#fff;}
+    .secondary{background:#fff; color:var(--text); border:2px solid var(--border);}
+
+    .status{
+      margin-top:14px;
+      min-height:1.5em;
+      text-align:center;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    @media (max-width:900px){
+      .wrap{max-width:860px; padding:16px 14px 28px;}
+      .row-layout{grid-template-columns:1fr;}
+      .author-card img{height:250px;}
+      .cards-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
+      .author-choice img{height:180px;}
+    }
+
+    @media (max-width:560px){
+      .wrap{padding:12px 10px 22px;}
+      .topbar{padding:14px 12px; border-radius:20px;}
+      .page-indicator{min-width:auto; width:100%;}
+      .nav{display:grid; grid-template-columns:1fr 1fr;}
+      .nav .page-indicator{grid-column:1 / -1; order:-1;}
+      .question{padding:12px;}
+      .intro{padding:13px 12px;}
+      .author-card{padding:10px;}
+      .author-card img{height:200px;}
+      .choice{padding:14px; min-height:64px; border-radius:16px;}
+      .cards-grid{grid-template-columns:1fr; gap:12px;}
+      .author-choice{padding:10px; border-radius:16px;}
+      .author-choice img{height:170px;}
+      .actions{display:grid; grid-template-columns:1fr 1fr;}
+      .actions button.mainbtn{width:100%; min-width:0; padding:14px 12px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Quiz autori e opere</h1>
+      <div class="subtitle">Seleziona una risposta per ogni riga. Poi premi Verifica.</div>
+      <div class="nav">
+        <button class="mainbtn secondary" onclick="prevPage()">Indietro</button>
+        <div class="page-indicator" id="pageIndicator">Pagina 1 di 4</div>
+        <button class="mainbtn primary" onclick="nextPage()">Avanti</button>
+      </div>
+    </div>
+
+    <div class="page active" id="page0">
+      <div class="intro">Abbina l'autore all'opera corretta.</div>
+
+      <div class="question" data-type="author-to-work" data-correct="Aladino e la lampada meravigliosa">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="mille.png" alt="Immagine di Shahrazād">
+            <div class="author-name">Shahrazād</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Aladino e la lampada meravigliosa</button>
+            <button class="choice" type="button">Cenerentola</button>
+            <button class="choice" type="button">Biancaneve</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="Cappuccetto Rosso">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="perrault.png" alt="Immagine di Charles Perrault">
+            <div class="author-name">Charles Perrault</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Cappuccetto Rosso</button>
+            <button class="choice" type="button">La Sirenetta</button>
+            <button class="choice" type="button">Favole al telefono</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="Hansel e Gretel">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="GRIMM.png" alt="Immagine dei Fratelli Grimm">
+            <div class="author-name">Fratelli Grimm</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Hansel e Gretel</button>
+            <button class="choice" type="button">Il libro degli errori</button>
+            <button class="choice" type="button">Fiabe italiane</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="La Sirenetta">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="andersen.png" alt="Immagine di Hans Christian Andersen">
+            <div class="author-name">Hans Christian Andersen</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">La Sirenetta</button>
+            <button class="choice" type="button">Cenerentola</button>
+            <button class="choice" type="button">L’uccello di fuoco</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="mainbtn primary" onclick="verifyPage(0)">Verifica</button>
+        <button class="mainbtn secondary" onclick="resetPage(0)">Reset</button>
+      </div>
+      <div class="status" id="status0"></div>
+    </div>
+
+    <div class="page" id="page1">
+      <div class="intro">Abbina l'autore all'opera corretta.</div>
+
+      <div class="question" data-type="author-to-work" data-correct="L’uccello di fuoco">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="afanasiev.png" alt="Immagine di Aleksandr Afanasiev">
+            <div class="author-name">Aleksandr Afanasiev</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">L’uccello di fuoco</button>
+            <button class="choice" type="button">Cappuccetto Verde</button>
+            <button class="choice" type="button">Fiabe italiane</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="Favole al telefono">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="RODARI.png" alt="Immagine di Gianni Rodari">
+            <div class="author-name">Gianni Rodari</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Favole al telefono</button>
+            <button class="choice" type="button">La Bella Addormentata</button>
+            <button class="choice" type="button">Aladino e la lampada meravigliosa</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="Cappuccetto Verde">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="MUNARI.png" alt="Immagine di Bruno Munari">
+            <div class="author-name">Bruno Munari</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Cappuccetto Verde</button>
+            <button class="choice" type="button">Hansel e Gretel</button>
+            <button class="choice" type="button">Biancaneve</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-type="author-to-work" data-correct="Fiabe italiane">
+        <div class="row-layout">
+          <div class="author-card">
+            <img src="CALVINO.png" alt="Immagine di Italo Calvino">
+            <div class="author-name">Italo Calvino</div>
+          </div>
+          <div class="choices-column">
+            <button class="choice" type="button">Fiabe italiane</button>
+            <button class="choice" type="button">La Sirenetta</button>
+            <button class="choice" type="button">Il brutto anatroccolo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="mainbtn primary" onclick="verifyPage(1)">Verifica</button>
+        <button class="mainbtn secondary" onclick="resetPage(1)">Reset</button>
+      </div>
+      <div class="status" id="status1"></div>
+    </div>
+
+    <div class="page" id="page2">
+      <div class="intro">Abbina l'opera all'autore corretto.</div>
+
+      <div class="question" data-type="work-to-author" data-correct="Shahrazād">
+        <div class="work-title">Aladino e la lampada meravigliosa</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="mille.png" alt="Immagine di Shahrazād">
+            <div>Shahrazād</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="perrault.png" alt="Immagine di Charles Perrault">
+            <div>Charles Perrault</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="GRIMM.png" alt="Immagine dei Fratelli Grimm">
+            <div>Fratelli Grimm</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Charles Perrault">
+        <div class="work-title">Cappuccetto Rosso</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="perrault.png" alt="Immagine di Charles Perrault">
+            <div>Charles Perrault</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="GRIMM.png" alt="Immagine dei Fratelli Grimm">
+            <div>Fratelli Grimm</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="andersen.png" alt="Immagine di Hans Christian Andersen">
+            <div>Hans Christian Andersen</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Fratelli Grimm">
+        <div class="work-title">Biancaneve</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="GRIMM.png" alt="Immagine dei Fratelli Grimm">
+            <div>Fratelli Grimm</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="perrault.png" alt="Immagine di Charles Perrault">
+            <div>Charles Perrault</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="andersen.png" alt="Immagine di Hans Christian Andersen">
+            <div>Hans Christian Andersen</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Hans Christian Andersen">
+        <div class="work-title">La Sirenetta</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="andersen.png" alt="Immagine di Hans Christian Andersen">
+            <div>Hans Christian Andersen</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="mille.png" alt="Immagine di Shahrazād">
+            <div>Shahrazād</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="GRIMM.png" alt="Immagine dei Fratelli Grimm">
+            <div>Fratelli Grimm</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="mainbtn primary" onclick="verifyPage(2)">Verifica</button>
+        <button class="mainbtn secondary" onclick="resetPage(2)">Reset</button>
+      </div>
+      <div class="status" id="status2"></div>
+    </div>
+
+    <div class="page" id="page3">
+      <div class="intro">Abbina l'opera all'autore corretto.</div>
+
+      <div class="question" data-type="work-to-author" data-correct="Aleksandr Afanasiev">
+        <div class="work-title">L’uccello di fuoco</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="afanasiev.png" alt="Immagine di Aleksandr Afanasiev">
+            <div>Aleksandr Afanasiev</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="RODARI.png" alt="Immagine di Gianni Rodari">
+            <div>Gianni Rodari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="CALVINO.png" alt="Immagine di Italo Calvino">
+            <div>Italo Calvino</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Gianni Rodari">
+        <div class="work-title">Favole al telefono</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="RODARI.png" alt="Immagine di Gianni Rodari">
+            <div>Gianni Rodari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="MUNARI.png" alt="Immagine di Bruno Munari">
+            <div>Bruno Munari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="CALVINO.png" alt="Immagine di Italo Calvino">
+            <div>Italo Calvino</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Bruno Munari">
+        <div class="work-title">Cappuccetto Verde</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="MUNARI.png" alt="Immagine di Bruno Munari">
+            <div>Bruno Munari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="RODARI.png" alt="Immagine di Gianni Rodari">
+            <div>Gianni Rodari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="CALVINO.png" alt="Immagine di Italo Calvino">
+            <div>Italo Calvino</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="question" data-type="work-to-author" data-correct="Italo Calvino">
+        <div class="work-title">Fiabe italiane</div>
+        <div class="cards-grid">
+          <button class="author-choice" type="button">
+            <img src="CALVINO.png" alt="Immagine di Italo Calvino">
+            <div>Italo Calvino</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="MUNARI.png" alt="Immagine di Bruno Munari">
+            <div>Bruno Munari</div>
+          </button>
+          <button class="author-choice" type="button">
+            <img src="afanasiev.png" alt="Immagine di Aleksandr Afanasiev">
+            <div>Aleksandr Afanasiev</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="mainbtn primary" onclick="verifyPage(3)">Verifica</button>
+        <button class="mainbtn secondary" onclick="resetPage(3)">Reset</button>
+      </div>
+      <div class="status" id="status3"></div>
+    </div>
+  </div>
+
+  
+  <script>
+    let currentPage = 0;
+
+    function initSelections(){
+      document.querySelectorAll('.page').forEach(page => {
+        page.querySelectorAll('.question').forEach(question => {
+          const buttons = question.querySelectorAll('.choice, .author-choice');
+          buttons.forEach(button => {
+            button.addEventListener('click', () => {
+              buttons.forEach(b => b.classList.remove('selected'));
+              button.classList.add('selected');
+            });
+          });
+        });
+      });
+    }
+
+    function getSelectedText(btn){
+      return btn.innerText.trim().replace(/\s+/g, ' ');
+    }
+
+    function verifyPage(pageIndex){
+      const page = document.getElementById('page' + pageIndex);
+      const questions = page.querySelectorAll('.question');
+      let allAnswered = true;
+      let allCorrect = true;
+
+      questions.forEach(question => {
+        const correctValue = question.dataset.correct;
+        const buttons = question.querySelectorAll('.choice, .author-choice');
+        const selected = question.querySelector('.selected');
+
+        buttons.forEach(btn => btn.classList.remove('correct', 'wrong'));
+
+        if(!selected){
+          allAnswered = false;
+          allCorrect = false;
+          return;
+        }
+
+        if(getSelectedText(selected) === correctValue){
+          selected.classList.add('correct');
+        } else {
+          selected.classList.add('wrong');
+          allCorrect = false;
+          buttons.forEach(btn => {
+            if(getSelectedText(btn) === correctValue){
+              btn.classList.add('correct');
+            }
+          });
+        }
+      });
+
+      const status = document.getElementById('status' + pageIndex);
+      if(!allAnswered){
+        status.textContent = 'Completa tutte le risposte.';
+      } else if(allCorrect){
+        status.textContent = 'Bravissimo. Tutte le risposte sono corrette.';
+        launchConfetti();
+        playVictory();
+      } else {
+        status.textContent = 'Ci sono alcune risposte sbagliate.';
+      }
+    }
+
+    function resetPage(pageIndex){
+      const page = document.getElementById('page' + pageIndex);
+      page.querySelectorAll('.choice, .author-choice').forEach(btn => {
+        btn.classList.remove('selected', 'correct', 'wrong');
+      });
+      document.getElementById('status' + pageIndex).textContent = '';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function showPage(index){
+      const pages = document.querySelectorAll('.page');
+      currentPage = Math.max(0, Math.min(index, pages.length - 1));
+      pages.forEach((page, i) => {
+        page.classList.toggle('active', i === currentPage);
+      });
+      document.getElementById('pageIndicator').textContent = 'Pagina ' + (currentPage + 1) + ' di ' + pages.length;
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function nextPage(){ showPage(currentPage + 1); }
+    function prevPage(){ showPage(currentPage - 1); }
+
+    function launchConfetti(){
+      if(typeof confetti !== 'function') return;
+      const duration = 1500;
+      const end = Date.now() + duration;
+      (function frame(){
+        confetti({particleCount:6,angle:60,spread:60,origin:{x:0}});
+        confetti({particleCount:6,angle:120,spread:60,origin:{x:1}});
+        if(Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    function playVictory(){
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const t = ctx.currentTime;
+
+      function tone(f, dt, delay){
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f;
+        o.type = 'triangle';
+        o.connect(g);
+        g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.001, t + delay);
+        g.gain.exponentialRampToValueAtTime(0.18, t + delay + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + delay + dt);
+        o.start(t + delay);
+        o.stop(t + delay + dt);
+      }
+
+      tone(523, 0.15, 0);
+      tone(659, 0.15, 0.15);
+      tone(784, 0.2, 0.3);
+    }
+
+    initSelections();
+    showPage(0);
+  </script>
+</body>
+</html>
