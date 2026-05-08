@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz autori e opere</title>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root{
       --bg:#f4f6fb;
@@ -18,53 +17,51 @@
       --green-border:#2e7d32;
       --red:#ffe3e3;
       --red-border:#d64545;
-      --shadow:0 8px 24px rgba(0,0,0,.08);
-      --radius:20px;
+      --shadow:0 4px 14px rgba(0,0,0,.08);
+      --radius:18px;
     }
 
     *{box-sizing:border-box}
 
-    html{-webkit-text-size-adjust:100%;}
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
       background:var(--bg);
       color:var(--text);
-      line-height:1.35;
     }
 
     .wrap{
-      max-width:1180px;
+      max-width:860px;
       margin:0 auto;
-      padding:20px 18px 34px;
+      padding:14px 12px 28px;
     }
 
     .topbar{
       background:#fff;
       border:2px solid var(--border);
-      border-radius:24px;
+      border-radius:22px;
       box-shadow:var(--shadow);
-      padding:18px;
-      margin-bottom:18px;
+      padding:14px;
+      margin-bottom:14px;
       text-align:center;
     }
 
     h1{
       margin:0 0 8px;
-      font-size:clamp(1.55rem, 2vw, 2rem);
+      font-size:1.75rem;
     }
 
     .subtitle{
       color:var(--muted);
-      font-size:clamp(.98rem, 1.5vw, 1.06rem);
-      margin-bottom:14px;
+      font-size:1rem;
+      margin-bottom:12px;
     }
 
     .nav{
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
+      gap:8px;
       flex-wrap:wrap;
     }
 
@@ -72,24 +69,29 @@
       background:#fff;
       border:2px solid var(--border);
       border-radius:999px;
-      padding:12px 18px;
+      padding:10px 16px;
       font-weight:700;
-      min-width:140px;
+      min-width:120px;
     }
 
-    .page{display:none}
-    .page.active{display:block}
+    .page{
+      display:none;
+    }
+
+    .page.active{
+      display:block;
+    }
 
     .intro{
       background:#fff;
       border:2px solid var(--border);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
-      padding:16px;
+      padding:14px;
       text-align:center;
-      font-size:clamp(1rem, 1.5vw, 1.12rem);
+      font-size:1.08rem;
       font-weight:700;
-      margin-bottom:16px;
+      margin-bottom:14px;
     }
 
     .question{
@@ -97,125 +99,128 @@
       border:2px solid var(--border);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
-      padding:16px;
-      margin-bottom:16px;
+      padding:14px;
+      margin-bottom:14px;
     }
 
     .row-layout{
       display:grid;
-      grid-template-columns:minmax(280px, 360px) minmax(0, 1fr);
-      gap:16px;
+      grid-template-columns: 1fr 1.2fr;
+      gap:12px;
       align-items:stretch;
     }
 
     .author-card{
       background:#fff;
       border:2px solid var(--border);
-      border-radius:18px;
-      padding:12px;
+      border-radius:16px;
+      padding:10px;
       text-align:center;
       display:flex;
       flex-direction:column;
       justify-content:center;
-      min-height:100%;
     }
 
     .author-card img{
       width:100%;
-      height:clamp(210px, 24vw, 280px);
+      height:160px;
       object-fit:cover;
-      border-radius:16px;
+      border-radius:14px;
       border:2px solid #e5e7eb;
-      margin-bottom:10px;
+      margin-bottom:8px;
       background:#fff;
     }
 
     .author-name{
-      font-size:clamp(1.08rem, 1.6vw, 1.22rem);
+      font-size:1.16rem;
       font-weight:700;
-      line-height:1.25;
-      padding:2px 4px 0;
+      line-height:1.2;
     }
 
     .choices-column{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
       justify-content:center;
     }
-
-    .choice, .author-choice{
-      -webkit-tap-highlight-color: transparent;
-      transition:transform .06s ease, background-color .15s ease, border-color .15s ease;
-    }
-    .choice:active, .author-choice:active{transform:scale(.99)}
 
     .choice{
       width:100%;
       border:2px solid var(--border);
       background:#fff;
-      border-radius:18px;
-      padding:16px 18px;
-      min-height:72px;
+      border-radius:16px;
+      padding:12px;
+      min-height:64px;
       text-align:left;
       cursor:pointer;
-      font-size:clamp(1rem, 1.5vw, 1.08rem);
+      font-size:1.05rem;
       font-weight:700;
       color:var(--text);
     }
 
-    .choice.selected, .author-choice.selected{
+    .choice.selected{
       background:var(--blue);
       border-color:var(--blue-border);
     }
 
-    .choice.correct, .author-choice.correct{
+    .choice.correct{
       background:var(--green);
       border-color:var(--green-border);
     }
 
-    .choice.wrong, .author-choice.wrong{
+    .choice.wrong{
       background:var(--red);
       border-color:var(--red-border);
     }
 
     .work-title{
-      font-size:clamp(1.08rem, 1.7vw, 1.22rem);
+      font-size:1.18rem;
       font-weight:700;
       line-height:1.3;
-      margin-bottom:14px;
+      margin-bottom:12px;
       text-align:left;
     }
 
     .cards-grid{
       display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:14px;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
     }
 
     .author-choice{
       border:2px solid var(--border);
       background:#fff;
-      border-radius:18px;
-      padding:12px;
+      border-radius:16px;
+      padding:10px;
       text-align:center;
       cursor:pointer;
       font-weight:700;
       color:var(--text);
-      min-height:100%;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
     }
 
     .author-choice img{
       width:100%;
-      height:clamp(180px, 18vw, 230px);
+      height:135px;
       object-fit:cover;
-      border-radius:16px;
+      border-radius:14px;
       border:2px solid #e5e7eb;
-      margin-bottom:10px;
+      margin-bottom:8px;
       background:#fff;
+    }
+
+    .author-choice.selected{
+      background:var(--blue);
+      border-color:var(--blue-border);
+    }
+
+    .author-choice.correct{
+      background:var(--green);
+      border-color:var(--green-border);
+    }
+
+    .author-choice.wrong{
+      background:var(--red);
+      border-color:var(--red-border);
     }
 
     .actions{
@@ -228,17 +233,25 @@
 
     button.mainbtn{
       border:none;
-      border-radius:18px;
-      padding:14px 20px;
+      border-radius:16px;
+      padding:14px 18px;
       font-size:1rem;
       font-weight:700;
       cursor:pointer;
-      min-width:132px;
+      min-width:126px;
       box-shadow:var(--shadow);
     }
 
-    .primary{background:#3aaee8; color:#fff;}
-    .secondary{background:#fff; color:var(--text); border:2px solid var(--border);}
+    .primary{
+      background:#3aaee8;
+      color:#fff;
+    }
+
+    .secondary{
+      background:#fff;
+      color:var(--text);
+      border:2px solid var(--border);
+    }
 
     .status{
       margin-top:14px;
@@ -248,32 +261,74 @@
       font-weight:700;
     }
 
-    @media (max-width:900px){
-      .wrap{max-width:860px; padding:16px 14px 28px;}
-      .row-layout{grid-template-columns:1fr;}
-      .author-card img{height:250px;}
-      .cards-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
-      .author-choice img{height:180px;}
+    @media (max-width:700px){
+      .row-layout{
+        grid-template-columns:1fr;
+      }
+      .author-card img{
+        height:180px;
+      }
+      .cards-grid{
+        grid-template-columns:repeat(2, 1fr);
+      }
     }
 
-    @media (max-width:560px){
-      .wrap{padding:12px 10px 22px;}
-      .topbar{padding:14px 12px; border-radius:20px;}
-      .page-indicator{min-width:auto; width:100%;}
-      .nav{display:grid; grid-template-columns:1fr 1fr;}
-      .nav .page-indicator{grid-column:1 / -1; order:-1;}
-      .question{padding:12px;}
-      .intro{padding:13px 12px;}
-      .author-card{padding:10px;}
-      .author-card img{height:200px;}
-      .choice{padding:14px; min-height:64px; border-radius:16px;}
-      .cards-grid{grid-template-columns:1fr; gap:12px;}
-      .author-choice{padding:10px; border-radius:16px;}
-      .author-choice img{height:170px;}
-      .actions{display:grid; grid-template-columns:1fr 1fr;}
-      .actions button.mainbtn{width:100%; min-width:0; padding:14px 12px;}
+    @media (max-width:480px){
+      .wrap{
+        padding:12px 10px 24px;
+      }
+      h1{
+        font-size:1.45rem;
+      }
+      .author-card img{
+        height:170px;
+      }
+      .author-choice img{
+        height:120px;
+      }
+      .choice{
+        min-height:60px;
+        font-size:1rem;
+      }
+      .cards-grid{
+        grid-template-columns:1fr 1fr;
+      }
     }
   </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js">
+function launchConfetti(){
+  if(typeof confetti !== 'function') return;
+  const duration = 1500;
+  const end = Date.now() + duration;
+  (function frame(){
+    confetti({particleCount:6,angle:60,spread:60,origin:{x:0}});
+    confetti({particleCount:6,angle:120,spread:60,origin:{x:1}});
+    if(Date.now()<end) requestAnimationFrame(frame);
+  })();
+}
+
+function playVictory(){
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if(!AudioCtx) return;
+  const ctx = new AudioCtx();
+  const t = ctx.currentTime;
+  function tone(f,dt){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.value=f;
+    o.type='triangle';
+    g.gain.setValueAtTime(0.001,t);
+    g.gain.exponentialRampToValueAtTime(0.2,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dt);
+    o.connect(g).connect(ctx.destination);
+    o.start(t);
+    o.stop(t+dt);
+  }
+  tone(523,0.15);
+  setTimeout(()=>tone(659,0.15),150);
+  setTimeout(()=>tone(784,0.2),300);
+}
+
+</script>
 </head>
 <body>
   <div class="wrap">
@@ -584,7 +639,6 @@
     </div>
   </div>
 
-  
   <script>
     let currentPage = 0;
 
@@ -669,47 +723,49 @@
       window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    function nextPage(){ showPage(currentPage + 1); }
-    function prevPage(){ showPage(currentPage - 1); }
-
-    function launchConfetti(){
-      if(typeof confetti !== 'function') return;
-      const duration = 1500;
-      const end = Date.now() + duration;
-      (function frame(){
-        confetti({particleCount:6,angle:60,spread:60,origin:{x:0}});
-        confetti({particleCount:6,angle:120,spread:60,origin:{x:1}});
-        if(Date.now() < end) requestAnimationFrame(frame);
-      })();
+    function nextPage(){
+      showPage(currentPage + 1);
     }
 
-    function playVictory(){
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if(!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const t = ctx.currentTime;
-
-      function tone(f, dt, delay){
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.frequency.value = f;
-        o.type = 'triangle';
-        o.connect(g);
-        g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.001, t + delay);
-        g.gain.exponentialRampToValueAtTime(0.18, t + delay + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.001, t + delay + dt);
-        o.start(t + delay);
-        o.stop(t + delay + dt);
-      }
-
-      tone(523, 0.15, 0);
-      tone(659, 0.15, 0.15);
-      tone(784, 0.2, 0.3);
+    function prevPage(){
+      showPage(currentPage - 1);
     }
 
     initSelections();
     showPage(0);
-  </script>
+  
+function launchConfetti(){
+  if(typeof confetti !== 'function') return;
+  const duration = 1500;
+  const end = Date.now() + duration;
+  (function frame(){
+    confetti({particleCount:6,angle:60,spread:60,origin:{x:0}});
+    confetti({particleCount:6,angle:120,spread:60,origin:{x:1}});
+    if(Date.now()<end) requestAnimationFrame(frame);
+  })();
+}
+
+function playVictory(){
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if(!AudioCtx) return;
+  const ctx = new AudioCtx();
+  const t = ctx.currentTime;
+  function tone(f,dt){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.value=f;
+    o.type='triangle';
+    g.gain.setValueAtTime(0.001,t);
+    g.gain.exponentialRampToValueAtTime(0.2,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dt);
+    o.connect(g).connect(ctx.destination);
+    o.start(t);
+    o.stop(t+dt);
+  }
+  tone(523,0.15);
+  setTimeout(()=>tone(659,0.15),150);
+  setTimeout(()=>tone(784,0.2),300);
+}
+
+</script>
 </body>
 </html>
